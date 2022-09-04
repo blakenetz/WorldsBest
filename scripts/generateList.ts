@@ -14,7 +14,7 @@ async function generateList(browser: Browser): Promise<Data[]> {
 		"div[data-list]:not([data-list*='Individual']) .item"
 	);
 
-	return Promise.all(
+	const list = Promise.all(
 		items.map(async (item) => {
 			return {
 				name: await item.$eval("h2", (node) => node.innerText),
@@ -24,6 +24,10 @@ async function generateList(browser: Browser): Promise<Data[]> {
 			};
 		})
 	);
+
+	console.log("🌻 successfully generated list of restaurants");
+
+	return list;
 }
 
 export default generateList;

@@ -1,6 +1,6 @@
 import { Page } from "puppeteer";
 
-async function createList(page: Page) {
+async function createNewPlacesList(page: Page) {
 	await page.goto("https://www.google.com/maps", { waitUntil: "networkidle0" });
 	// open menu
 	await page.click('button[aria-label="Menu"');
@@ -23,4 +23,4 @@ async function createList(page: Page) {
 	console.log("🌻 successfully created new list");
 }
 
-export default createList;
+export default createNewPlacesList;

@@ -1,11 +1,11 @@
-import { LaunchOptions } from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth"; // Use v2.4.5 instead of latest
 import * as dotenv from "dotenv";
 
 import generateList, { Data } from "./scripts/generateList";
 import signIn from "./scripts/signIn";
-import createList from "./scripts/createList";
+import createNewPlacesList from "./scripts/createNewPlacesList";
+import addMarkers from "./scripts/addMarkers";
 
 const [skipList = false] = process.argv.slice(2);
 dotenv.config();
@@ -15,31 +15,37 @@ dotenv.config();
 	stealthPlugin.enabledEvasions.delete("iframe.contentWindow");
 	stealthPlugin.enabledEvasions.delete("navigator.plugins");
 	puppeteer.use(stealthPlugin);
+	// headless browser used to generate list of restaurants
+	const headless = await puppeteer.launch({ headless: true });
+	// browser for google
 	const browser = await puppeteer.launch({ headless: false });
-
-	// fetch list of restaurants
-	// let list: Data[];
-	// try {
-	// 	list = await generateList(browser);
-	// } catch (error) {
-	// 	console.error("🤮 error: ", error);
-	// 	await browser.close();
-	// }
-
 	const page = await browser.newPage();
 	await page.setBypassCSP(true);
 
-	await signIn(page).catch(async (err) => {
-		console.error("🤮 error signing in: ", err);
-		await browser.close();
-	});
+	// closure around exit function
+	async function exit() {
+		await Promise.all([headless.close(), browser.close()]);
+	}
 
+	// fetch list of restaurants
+	const [list] = (await Promise.all([
+		generateList(headless),
+		signIn(page),
+	]).catch(async (err) => {
+		console.error("🤮 error generating list: ", err);
+		await exit();
+	})) as [Data[], void];
+
+	// generate new list if necessary
 	if (!skipList) {
-		await createList(page).catch(async (err) => {
+		await createNewPlacesList(page).catch(async (err) => {
 			console.error("🤮 error creating list: ", err);
-			await browser.close();
+			await exit();
 		});
 	}
 
-	await browser.close();
+	// create pins
+	await addMarkers(page, list as Data[]);
+
+	await exit();
 })();
