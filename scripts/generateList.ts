@@ -5,9 +5,15 @@ export interface Data {
 	location: string;
 }
 
-async function generateList(browser: Browser): Promise<Data[]> {
+async function generateList(browser: Browser, year: number): Promise<Data[]> {
+	/**
+	 * @todo fetch data for provided year
+	 */
+
 	const page = await browser.newPage();
-	await page.goto("https://www.theworlds50best.com/list/1-50");
+	await page.goto("https://www.theworlds50best.com/list/1-50", {
+		waitUntil: "networkidle0",
+	});
 
 	// fetch all items from lists
 	const items = await page.$$(

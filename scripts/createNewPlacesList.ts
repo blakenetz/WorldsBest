@@ -1,8 +1,16 @@
 import { Page } from "puppeteer";
 
-export const label = `World's Best Restaurants ${new Date().getFullYear() - 1}`;
+export interface LabelArgs {
+	year?: number;
+	label?: string;
+}
 
-async function createNewPlacesList(page: Page) {
+export function generateLabel({ year, label }: LabelArgs) {
+	return label ?? `World's Best Restaurants ${year}`;
+}
+
+async function createNewPlacesList(page: Page, labelArgs: LabelArgs) {
+	const label = generateLabel(labelArgs);
 	await page.goto("https://www.google.com/maps", { waitUntil: "networkidle0" });
 	// open menu
 	await page.click('button[aria-label="Menu"');

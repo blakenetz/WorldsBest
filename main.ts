@@ -1,16 +1,36 @@
 import * as dotenv from "dotenv";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 import addMarkers from "./scripts/addMarkers";
 import createNewPlacesList from "./scripts/createNewPlacesList";
 import generateList, { Data } from "./scripts/generateList";
 import signIn from "./scripts/signIn";
 
-const [skipList = false] = process.argv.slice(2);
+interface Args {
+	skipList?: boolean;
+	year?: number;
+	label?: string;
+	"2fa"?: boolean;
+}
+
 dotenv.config();
 
 (async () => {
+	const argv = await yargs(hideBin(process.argv)).argv;
+	const {
+		skipList = false,
+		year = new Date().getFullYear() - 1,
+		label,
+		...rest
+	} = (argv as Args) || {};
+
+	const twoFactorAuth = rest["2fa"] ?? true;
+
+	console.log(argv, skipList);
+
 	const stealthPlugin = StealthPlugin();
 	stealthPlugin.enabledEvasions.delete("iframe.contentWindow");
 	stealthPlugin.enabledEvasions.delete("navigator.plugins");
@@ -27,28 +47,33 @@ dotenv.config();
 		await Promise.all([headless.close(), browser.close()]);
 	}
 
-	// fetch list of restaurants
+	// fetch list of restaurants and sign in
 	const [list] = (await Promise.all([
-		generateList(headless),
-		signIn(page),
+		generateList(headless, year),
+		signIn(page, twoFactorAuth),
 	]).catch(async (err) => {
 		console.error("🤮 error generating list: ", err);
 		await exit();
 	})) as [Data[], void];
 
 	// generate new list if necessary
-	if (!skipList) {
-		await createNewPlacesList(page).catch(async (err) => {
+	if (skipList !== true) {
+		await createNewPlacesList(page, { year, label }).catch(async (err) => {
 			console.error("🤮 error creating list: ", err);
 			await exit();
 		});
 	}
 
 	// create pins
-	await addMarkers(page, list as Data[]).catch(async (err) => {
-		console.error("🤮 error adding markers: ", err);
-		await exit();
-	});
+	const errors = await addMarkers(page, list as Data[], { year, label }).catch(
+		async (err) => {
+			console.error("🤮 error adding markers: ", err);
+			await exit();
+		}
+	);
+	if ((errors || []).length) {
+		console.error(`🤮 unable to save: ${(errors || []).join(", ")}`);
+	}
 
 	await exit();
 })();

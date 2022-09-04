@@ -1,6 +1,6 @@
 import { Page } from "puppeteer";
 
-async function signIn(page: Page) {
+async function signIn(page: Page, twoFactorAuth: boolean) {
 	const { GOOGLE_EMAIL, GOOGLE_PASSWORD } = process.env;
 
 	if (!GOOGLE_EMAIL || !GOOGLE_PASSWORD) {
@@ -19,7 +19,10 @@ async function signIn(page: Page) {
 	await page.keyboard.press("Enter");
 
 	// navigate to 2fa
-	await page.waitForNavigation();
+	if (twoFactorAuth) {
+		await page.waitForNavigation();
+	}
+
 	// success!
 	await page.waitForNavigation();
 
