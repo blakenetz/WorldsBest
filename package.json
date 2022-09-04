@@ -1,0 +1,27 @@
+{
+  "name": "worlds-best",
+  "version": "1.0.0",
+  "description": "create list of world's best restaurants",
+  "main": "main.js",
+  "scripts": {
+    "execute": "ts-node ./main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blakenetz/WorldsBest.git"
+  },
+  "author": "blake netzeband<blake.netzeband@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/blakenetz/WorldsBest/issues"
+  },
+  "homepage": "https://github.com/blakenetz/WorldsBest#readme",
+  "dependencies": {
+    "puppeteer": "^17.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.14",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.2"
+  }
+}
