@@ -1,15 +1,18 @@
 import requests
+import re
+import os
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+
+load_dotenv()
 
 r = requests.get('https://www.theworlds50best.com/list/1-50')
 soup = BeautifulSoup(r.text, 'html.parser')
-first50 = soup.find(attrs={'data-list': '1-50'})
-second50 = soup.find(attrs={'data-list': '51-100'})
+# fetch items
+items = soup.select("div[data-list]:not([data-list*='Individual']) .item")
 
-items = first50.find_all(class_='item')
-
+# generate list of restaurants
 data = []
-
 for item in items:
     name = item.find('h2')
     entry = {
@@ -18,5 +21,7 @@ for item in items:
     }
     data.append(entry)
 
-print(data)
-print(len(data))
+
+# GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID')
+# SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE')
+# STORAGE_BUCKET_NAME = os.getenv('STORAGE_BUCKET_NAME')
