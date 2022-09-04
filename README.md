@@ -32,3 +32,4 @@ Here's a list of possible args
 | year     | year inserted in list name above (note: does not affect what year it'll fetch data for) | [current year]                         |
 | label    | name of the Google Maps Places list                                                     | `World's Best Restaurants [last year]` |
 | 2fa      | whether or not to expect 2fa when signing into google                                   | true                                   |
+| debug    | display excess debug logs                                                               | true                                   |

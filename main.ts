@@ -14,6 +14,7 @@ interface Args {
 	year?: number;
 	label?: string;
 	"2fa"?: boolean;
+	debug?: boolean;
 }
 
 dotenv.config();
@@ -21,15 +22,14 @@ dotenv.config();
 (async () => {
 	const argv = await yargs(hideBin(process.argv)).argv;
 	const {
-		skipList = false,
 		year = new Date().getFullYear() - 1,
 		label,
 		...rest
 	} = (argv as Args) || {};
 
-	const twoFactorAuth = rest["2fa"] ?? true;
-
-	console.log(argv, skipList);
+	const twoFactorAuth = rest["2fa"] ? Boolean(rest["2fa"]) : true;
+	const skipList = rest["skipList"] ? Boolean(rest["skipList"]) : false;
+	const debug = rest["debug"] ? Boolean(rest["skipList"]) : true;
 
 	const stealthPlugin = StealthPlugin();
 	stealthPlugin.enabledEvasions.delete("iframe.contentWindow");
@@ -52,25 +52,28 @@ dotenv.config();
 		generateList(headless, year),
 		signIn(page, twoFactorAuth),
 	]).catch(async (err) => {
-		console.error("🤮 error generating list: ", err);
+		if (debug) console.error("🤮 error generating list: ", err);
 		await exit();
 	})) as [Data[], void];
 
 	// generate new list if necessary
 	if (skipList !== true) {
 		await createNewPlacesList(page, { year, label }).catch(async (err) => {
-			console.error("🤮 error creating list: ", err);
+			if (debug) console.error("🤮 error creating list: ", err);
 			await exit();
 		});
 	}
 
 	// create pins
-	const errors = await addMarkers(page, list as Data[], { year, label }).catch(
-		async (err) => {
-			console.error("🤮 error adding markers: ", err);
-			await exit();
-		}
-	);
+	const errors = await addMarkers(
+		page,
+		list as Data[],
+		{ year, label },
+		debug
+	).catch(async (err) => {
+		if (debug) console.error("🤮 error adding markers: ", err);
+		await exit();
+	});
 	if ((errors || []).length) {
 		console.error(`🤮 unable to save: ${(errors || []).join(", ")}`);
 	}

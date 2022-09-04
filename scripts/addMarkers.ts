@@ -5,7 +5,8 @@ import { Data } from "./generateList";
 async function addMarkers(
 	page: Page,
 	list: Data[],
-	labelArgs: LabelArgs
+	labelArgs: LabelArgs,
+	debug: boolean
 ): Promise<string[]> {
 	await page.goto("https://www.google.com/maps", { waitUntil: "networkidle0" });
 
@@ -71,7 +72,7 @@ async function addMarkers(
 			// wait for save
 			await page.waitForNetworkIdle();
 		} catch (error) {
-			console.error("🤮 adding marker", error);
+			if (debug) console.error("🤮 adding marker", error);
 			errors.push(name);
 		}
 	}
