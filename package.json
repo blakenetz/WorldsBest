@@ -4,7 +4,8 @@
   "description": "create list of world's best restaurants",
   "main": "main.js",
   "scripts": {
-    "execute": "ts-node ./main.ts"
+    "start": "ts-node ./main.ts",
+    "start:no-list": "ts-node ./main.ts true"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.7.14",
+    "@types/puppeteer": "^5.4.6",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.0",
     "typescript": "^4.8.2"

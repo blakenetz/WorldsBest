@@ -1,11 +1,11 @@
-import puppeteer from "puppeteer-extra";
-import StealthPlugin from "puppeteer-extra-plugin-stealth"; // Use v2.4.5 instead of latest
 import * as dotenv from "dotenv";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
+import addMarkers from "./scripts/addMarkers";
+import createNewPlacesList from "./scripts/createNewPlacesList";
 import generateList, { Data } from "./scripts/generateList";
 import signIn from "./scripts/signIn";
-import createNewPlacesList from "./scripts/createNewPlacesList";
-import addMarkers from "./scripts/addMarkers";
 
 const [skipList = false] = process.argv.slice(2);
 dotenv.config();
@@ -45,7 +45,10 @@ dotenv.config();
 	}
 
 	// create pins
-	await addMarkers(page, list as Data[]);
+	await addMarkers(page, list as Data[]).catch(async (err) => {
+		console.error("🤮 error adding markers: ", err);
+		await exit();
+	});
 
 	await exit();
 })();

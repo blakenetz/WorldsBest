@@ -1,4 +1,4 @@
-import { Browser, ElementHandle } from "puppeteer";
+import { Browser } from "puppeteer";
 
 export interface Data {
 	name: string;
